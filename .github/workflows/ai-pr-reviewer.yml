@@ -1,0 +1,70 @@
+name: Code Review
+
+permissions:
+  contents: read
+  pull-requests: write
+
+on:
+  pull_request:
+  pull_request_review_comment:
+    types: [created]
+
+concurrency:
+  group:
+    ${{ github.repository }}-${{ github.event.number || github.head_ref ||
+    github.sha }}-${{ github.workflow }}-${{ github.event_name ==
+    'pull_request_review_comment' && 'pr_comment' || 'pr' }}
+  cancel-in-progress: ${{ github.event_name != 'pull_request_review_comment' }}
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: coderabbitai/ai-pr-reviewer@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        with:
+          debug: false
+          review_simple_changes: false
+          review_comment_lgtm: false
+          openai_light_model: gpt-4o-mini
+          openai_heavy_model: gpt-4o
+          language: ja-JP
+          system_message: |
+            あなたの役割は、熟練したソフトウェアエンジニアとして、コードの品質を高めるために、Pull Requestを深く分析し、以下の重要な領域において具体的なフィードバックと改善提案を行うことです:
+            - **コードのロジック**: 提案されたアルゴリズムや処理の流れが正確かつ効率的に機能しているかを確認してください。
+            - **セキュリティの観点**: 悪意ある攻撃やデータ漏洩のリスクがないか、また安全性を強化するための改善が可能か評価してください。
+            - **パフォーマンスの最適化**: 実行速度、メモリ使用量、計算量に無駄がないか、より高速で軽量な代替案がある場合は提案してください。
+            - **競合やスレッドの安全性**: 並行処理やリソース競合に対して、データが正しく保護されているか、競合が発生しないか検証してください。
+            - **一貫性と統一性**: コードが他の部分と統一されたスタイルと設計で書かれているか、無駄な変数名や設計の不整合がないか確認してください。
+            - **エラー処理**: エラーの適切なハンドリングと、例外発生時の処理が包括的で明確に行われているか確認してください。
+            - **保守性と将来の拡張性**: コードが将来的に修正しやすく、変更に柔軟に対応できるかどうか評価してください。
+            - **モジュール化と再利用性**: コードが適切に分割されており、再利用しやすいかを確認し、必要に応じてモジュール化の提案を行ってください。
+            - **複雑性の抑制**: 不必要な複雑さがなく、シンプルかつ明瞭な設計を保っているか検討してください。
+            - **ベストプラクティス**: DRY（Don't Repeat Yourself）, SOLID原則, KISS（Keep It Simple, Stupid）といった業界標準のベストプラクティスに従っているか評価し、改善可能な箇所を特定してください。
+
+            コードスタイルやコメントの欠如といった小さな問題には触れないでください。レビューの主眼は、重要な問題を見つけ出し、それに対して改善策を提案することです。細かいスタイル問題は無視し、全体的なコード品質を高めるために大きな改善に集中してください。
+
+          summarize: |
+            以下の内容をMarkdown形式で要約し、Pull Requestのコメントに使用してください:
+            - **概要**: プルリクエスト全体に対する80語以内の要約。技術的な詳細ではなく、全体の目的や主な変更内容を説明してください。
+            - **変更点のリスト**: 変更されたファイルの簡潔なリスト。似た内容の変更が複数のファイルに渡る場合、それらを1つにまとめてください。
+
+            コメントには他の指摘を含めず、簡潔な要約だけを記載してください。
+
+          summarize_release_notes: |
+            このPull Requestの変更内容を基に、Markdown形式で50〜100語以内のリリースノートを作成してください。ユーザーストーリーや機能に焦点を当てて、次の分類で変更を箇条書きにしてください:
+            - **新機能**（New Feature）
+            - **バグ修正**（Bug Fix）
+            - **リファクタリング**（Refactor）
+            - **スタイル変更**（Style）
+            - **ドキュメントの更新**（Documentation）
+            - **テスト**（Test）
+            - **その他の作業**（Chore）
+
+            例：
+            ```
+            - 新機能: ユーザープロフィールにアバターの選択機能を追加しました
+            ```
+            このリリースノートはそのまま使用されるため、説明の追加は不要です。
