@@ -6,8 +6,11 @@ permissions:
 
 on:
   pull_request:
+    types:
+      - opened
   pull_request_review_comment:
-    types: [created]
+    types:
+      - created
 
 concurrency:
   group:
