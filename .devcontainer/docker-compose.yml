@@ -14,7 +14,7 @@ services:
       - 8080:8080
 
   db:
-    image: postgres:latest
+    image: postgres:15.8-bookworm
     restart: unless-stopped
     ports:
       - 5432:5432
