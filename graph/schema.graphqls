@@ -1,0 +1,87 @@
+scalar DateTime
+scalar Date
+scalar URL
+
+type User {
+  id: ID!
+  username: String!
+  displayName: String!
+  email: String!
+  passwordHash: String!
+  profile: Profile!
+  following: [User!]
+  followers: [User!]
+  followingAvatar: [Avatar!]
+  banned: Boolean!
+  banInfo: Ban
+}
+
+type Ban {
+  id: ID!
+  reason: String!
+  bannedAt: DateTime!
+  user: User!
+}
+
+type Profile {
+  birthdate: Date
+  bio: String!
+  imageURL: URL
+}
+
+type Avatar {
+  id: ID!
+  name: String!
+  user: User!
+  followers: [User!]
+}
+
+type Post {
+  id: ID!
+  user: User!
+  avatar: Avatar!
+  content: String!
+  createdAt: DateTime!
+  images: [Image!]
+  category: Category!
+  tags: [Tag!]
+  comments: [PostComment!]
+  reactions: [PostReaction!]
+}
+
+type Image {
+  url: URL!
+}
+
+type Category {
+  id: ID!
+  name: String!
+}
+
+type Tag {
+  id: ID!
+  name: String!
+}
+
+type PostComment {
+  id: ID!
+  user: User!
+  content: String!
+  createdAt: DateTime!
+}
+
+type PostReaction {
+  id: ID!
+  user: User!
+  reaction: [Reaction!]
+}
+
+type Reaction {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  user: User!
+  users: [User!]!
+}
