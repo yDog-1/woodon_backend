@@ -14,6 +14,7 @@ type User {
   followingAvatar: [Avatar!]
   banned: Boolean!
   banInfo: Ban
+  posts(after: String, before: String, first: Int, last: Int, category: ID): PostConnection!
 }
 
 type Ban {
@@ -49,6 +50,18 @@ type Post {
   reactions: [PostReaction!]
 }
 
+type PostEdge {
+  cursor: String!
+  node: Post
+}
+
+type PostConnection {
+  edges: [PostEdge]
+  nodes: [Post]
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
 type Image {
   url: URL!
 }
@@ -81,7 +94,30 @@ type Reaction {
   name: String!
 }
 
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
 type Query {
-  user: User!
+  user(id: ID!): User!
   users: [User!]!
+
+  post(id: ID!): Post!
+
+  category(id: ID!): Category!
+  rea
+  }
+
+input NewUser {
+  username: String!
+  displayName: String!
+  email: String!
+  passwordHash: String!
+}
+
+type Mutation {
+  createUser(input: NewUser!): User!
 }
